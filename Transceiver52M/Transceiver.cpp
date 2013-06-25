@@ -105,6 +105,7 @@ Transceiver::Transceiver(int wBasePort,
   }
 
   mOn = false;
+  mRunning = false;
   mTxFreq = 0.0;
   mRxFreq = 0.0;
   mPower = -10;
@@ -198,7 +199,8 @@ void Transceiver::pushRadioVector(GSM::Time &nowTime)
          }
        }
     }
-    mRadioInterface->driveTransmitRadio(*(next),(mChanType[TN]==NONE)); //fillerTable[modFN][TN]));
+    if (mRunning)
+      mRadioInterface->driveTransmitRadio(*(next),(mChanType[TN]==NONE)); //fillerTable[modFN][TN]));
     delete next;
 #ifdef TRANSMIT_LOGGING
     if (nowTime.TN()==TRANSMIT_LOGGING) { 
@@ -209,7 +211,8 @@ void Transceiver::pushRadioVector(GSM::Time &nowTime)
   }
 
   // otherwise, pull filler data, and push to radio FIFO
-  mRadioInterface->driveTransmitRadio(*(fillerTable[modFN][TN]),(mChanType[TN]==NONE));
+  if (mRunning)
+    mRadioInterface->driveTransmitRadio(*(fillerTable[modFN][TN]),(mChanType[TN]==NONE));
 #ifdef TRANSMIT_LOGGING
   if (nowTime.TN()==TRANSMIT_LOGGING) 
     unModulateVector(*fillerTable[modFN][TN]);
@@ -515,8 +518,9 @@ void Transceiver::driveControl()
   LOG(INFO) << "command is " << buffer;
 
   if (strcmp(command,"POWEROFF")==0) {
+    mRunning = false;
     // turn off transmitter/demod
-    sprintf(response,"RSP POWEROFF 0"); 
+    sprintf(response,"RSP POWEROFF 0");
   }
   else if (strcmp(command,"POWERON")==0) {
     // turn on transmitter/demod
@@ -541,6 +545,7 @@ void Transceiver::driveControl()
 
         mOn = true;
       }
+      mRunning = true;
     }
   }
   else if  (strcmp(command,"HANDOVER")==0){

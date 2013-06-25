@@ -129,6 +129,7 @@ private:
   int mSamplesPerSymbol;               ///< number of samples per GSM symbol
 
   bool mOn;			       ///< flag to indicate that transceiver is powered on
+  bool mRunning;		       ///< flag to indicate that transceiver transmitting
   ChannelCombination mChanType[8];     ///< channel types for all timeslots
   bool mHandover[8][8];                ///< expect handover to the timeslot/subslot
   double mTxFreq;                      ///< the transmit frequency
